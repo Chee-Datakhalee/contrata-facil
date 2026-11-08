@@ -80,9 +80,17 @@ function Form() {
     });
     if (error) {
       setLoading(false);
-      if (error.message.includes('already')) setErro('Este e-mail já tem cadastro. Use "Entrar".');
-      else if (error.message.includes('Database error')) setErro(empresa ? 'Não foi possível criar a conta. Confira o CNPJ: ele pode já estar cadastrado.' : 'Não foi possível criar a conta. Confira os dados.');
-      else setErro('Não foi possível criar a conta. Confira os dados.');
+      const codigo = (error as any).code as string | undefined;
+      const msg = error.message || '';
+      console.error('[cadastro]', error.status, codigo, msg);
+      if (codigo === 'user_already_exists' || /already/i.test(msg)) setErro('Este e-mail já tem cadastro. Use "Entrar".');
+      else if (codigo === 'weak_password' || /password/i.test(msg)) setErro('Senha recusada pelo servidor. Escolha outra, mais forte e que não seja comum.');
+      else if (codigo === 'captcha_failed' || /captcha/i.test(msg)) setErro('O CAPTCHA está ligado no Supabase, mas o app ainda não tem o campo dele. Desligue-o por enquanto.');
+      else if (codigo === 'signup_disabled') setErro('Novos cadastros estão desativados no Supabase.');
+      else if (codigo === 'over_email_send_rate_limit' || error.status === 429) setErro('Muitos e-mails enviados em pouco tempo. Aguarde um pouco e tente de novo.');
+      else if (codigo === 'email_address_invalid' || codigo === 'email_address_not_authorized' || /email/i.test(msg)) setErro('O servidor recusou este e-mail. Confira se ele está certo.');
+      else if (/Database error/i.test(msg)) setErro(empresa ? 'Não foi possível criar a conta. Confira o CNPJ: ele pode já estar cadastrado.' : 'O banco recusou o cadastro. Confira nome, telefone e cidade.');
+      else setErro(`Não foi possível criar a conta (${codigo || error.status || 'erro'}). Confira os dados.`);
       return;
     }
     if (!data.session) {
