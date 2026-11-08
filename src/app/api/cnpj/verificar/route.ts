@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { consultarCnpj } from '@/lib/cnpj-server';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
 
 // POST /api/cnpj/verificar  (Authorization: Bearer <token do usuário>)
 // Confirma na Receita o CNPJ GUARDADO no cadastro da empresa do usuário logado e marca como verificado.
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
   await admin.from('companies').update({ cnpj_ultima_tentativa: new Date().toISOString() }).eq('id', c.id);
 
   const r = await consultarCnpj(c.cnpj);
-  if (!r.ok || !r.dados) return NextResponse.json({ erro: r.erro || 'Falha na consulta.' }, { status: r.status || 502 });
+  if (!r.ok || !r.dados) return NextResponse.json({ erro: r.erro || 'Falha na consulta.', detalhe: r.detalhe }, { status: r.status || 502 });
 
   if (!r.dados.ativa) {
     return NextResponse.json(
