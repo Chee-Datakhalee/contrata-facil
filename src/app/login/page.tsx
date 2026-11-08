@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
@@ -17,6 +17,13 @@ export default function Login() {
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    try {
+      const aviso = sessionStorage.getItem('cf_aviso');
+      if (aviso) { setErro(aviso); sessionStorage.removeItem('cf_aviso'); }
+    } catch {}
+  }, []);
 
   async function entrar(e: React.FormEvent) {
     e.preventDefault();
@@ -38,8 +45,14 @@ export default function Login() {
       return;
     }
     try { localStorage.removeItem(CHAVE); } catch {}
-    const { data: p } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
-    router.replace(p?.role === 'empresa' ? '/empresa' : '/candidato');
+    const { data: p } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
+    if (!p) {
+      await supabase.auth.signOut();
+      setLoading(false);
+      setErro('Esta conta não tem perfil no Contrata Fácil. Crie uma conta nova em "Criar conta" (use outro e-mail se este já foi usado antes).');
+      return;
+    }
+    router.replace(p.role === 'empresa' ? '/empresa' : '/candidato');
   }
 
   return (
