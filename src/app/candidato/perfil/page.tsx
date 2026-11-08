@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'; 
 import { useRouter } from 'next/navigation';
 import { Briefcase, Users, GraduationCap, Clock, MapPin, ChevronRight, ChevronDown, X, UserRound, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
