@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react'; 
 import { useRouter } from 'next/navigation';
 import { Bell, SlidersHorizontal, MapPin, Briefcase, Gift, Building2, X, Check, ChevronDown } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
