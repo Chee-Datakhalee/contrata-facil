@@ -15,6 +15,14 @@ export default function ExcluirConta() {
   async function excluir() {
     setErro('');
     setLoading(true);
+    // fotos (LGPD): remove os arquivos do armazenamento antes de apagar a conta
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: arquivos } = await supabase.storage.from('avatares').list(user.id);
+        if (arquivos?.length) await supabase.storage.from('avatares').remove(arquivos.map((a) => `${user.id}/${a.name}`));
+      }
+    } catch {}
     const { error } = await supabase.rpc('excluir_minha_conta');
     if (error) {
       setLoading(false);
