@@ -15,6 +15,7 @@ import { CompatBadge } from '@/components/Compat';
 import Toast from '@/components/Toast';
 import AvatarUpload from '@/components/AvatarUpload';
 import FechadasHoje from '@/components/FechadasHoje';
+import CapaFundo from '@/components/CapaFundo'; // MUDOU: linha nova
 import Loading from '@/components/Loading';
 
 const PASSADAS_KEY = 'cf_vagas_passadas';
@@ -156,10 +157,7 @@ export default function Oportunidades() {
               onPointerCancel={() => { start.current = null; setDx(0); }}
             >
               <div className="relative h-48 bg-gradient-to-br from-brand-700 to-brand-900">
-                {atual.job.companies?.cover_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={atual.job.companies.cover_url} alt="" className="h-full w-full object-cover" draggable={false} />
-                )}
+                <CapaFundo url={atual.job.companies?.cover_url} /> {/* MUDOU: no lugar do bloco antigo da imagem */}
                 <div className="absolute left-3 top-3"><CompatBadge pct={atual.compat.total} /></div>
                 <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-black/55 px-3 py-1.5 text-sm font-bold text-white">
                   <MapPin size={14} /> {atual.job.city.split(' - ')[0]}
