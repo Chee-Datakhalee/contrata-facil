@@ -13,6 +13,8 @@ import BottomNav, { NAV_CANDIDATO } from '@/components/BottomNav';
 import VagasCounter from '@/components/VagasCounter';
 import { CompatBadge } from '@/components/Compat';
 import Toast from '@/components/Toast';
+import AvatarUpload from '@/components/AvatarUpload';
+import FechadasHoje from '@/components/FechadasHoje';
 import Loading from '@/components/Loading';
 
 const PASSADAS_KEY = 'cf_vagas_passadas';
@@ -28,6 +30,7 @@ export default function Oportunidades() {
   const [soAlta, setSoAlta] = useState(false);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
+  const [foto, setFoto] = useState<string | null>(null);
   const [dx, setDx] = useState(0);
   const start = useRef<number | null>(null);
   const moved = useRef(false);
@@ -104,13 +107,14 @@ export default function Oportunidades() {
     <>
       <Toast msg={toast} onClose={() => setToast(null)} />
       <main className="safe-bottom px-5 pt-5">
+        <FechadasHoje />
         <header className="flex items-center justify-between">
           <LogoDeitada height={44} />
           <div className="flex items-center gap-3">
             <button aria-label="Notificações" className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white shadow">
               <Bell size={22} className="text-brand-700" />
             </button>
-            <button aria-label="Meu perfil" onClick={() => router.push('/candidato/perfil')}><Avatar nome={profile?.full_name} url={profile?.avatar_url} size={44} /></button>
+            <AvatarUpload tipo="perfil" nome={profile?.full_name} url={foto ?? profile?.avatar_url} size={44} onDone={setFoto} onErro={setToast} />
           </div>
         </header>
 
