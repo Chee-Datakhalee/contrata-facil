@@ -9,6 +9,7 @@ import { calcCompat, perfilCompleto, salarioTexto } from '@/lib/compat';
 import { candidatar } from '@/lib/apply';
 import type { Candidate, Job } from '@/lib/types';
 import Avatar from '@/components/Avatar';
+import CapaFundo from '@/components/CapaFundo'; // MUDOU: linha nova
 import { CompatBadge, CompatPill } from '@/components/Compat';
 import Toast from '@/components/Toast';
 import Loading from '@/components/Loading';
@@ -77,10 +78,7 @@ export default function DetalheVaga() {
       <Toast msg={toast} onClose={() => setToast(null)} />
       <main className="pb-10">
         <div className="relative h-52 bg-gradient-to-br from-brand-700 to-brand-900">
-          {job.companies?.cover_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={job.companies.cover_url} alt="" className="h-full w-full object-cover" />
-          )}
+          <CapaFundo url={job.companies?.cover_url} /> {/* MUDOU: no lugar do bloco antigo da imagem */}
           <div className="absolute inset-x-0 top-0 flex items-center justify-between bg-gradient-to-b from-black/40 to-transparent px-4 pb-6 pt-4">
             <button onClick={() => router.back()} aria-label="Voltar" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90"><ChevronLeft /></button>
             <p className="text-lg font-extrabold text-white">Detalhes da Vaga</p>
