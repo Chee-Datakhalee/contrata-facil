@@ -57,7 +57,7 @@ export default function Plano() {
         <h1 className="text-3xl font-extrabold text-brand-900">Olá, {company?.name}!</h1>
         <p className="mt-1 flex items-center gap-2 text-brand-700"><span className={`h-2.5 w-2.5 rounded-full ${ativa ? 'bg-emerald-500' : 'bg-amber-500'}`} /> {ativa ? 'Sua conta está ativa' : 'Sua conta está pendente'}</p>
 
-        <section className="mt-5 flex items-center justify-between rounded-3xl bg-gradient-to-br from-brand-700 to-brand-900 p-5 text-white shadow-lg">
+        <section className="mt-5 hidden items-center justify-between rounded-3xl bg-gradient-to-br from-brand-700 to-brand-900 p-5 text-white shadow-lg">
           <div>
             <p className="text-sm font-semibold text-white/80">Acesso Beta Tester</p>
             <p className="mt-1 text-2xl font-extrabold">Liberado grátis</p>
