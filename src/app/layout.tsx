@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description: 'Encontre. Contrate. Cresça.',
   manifest: '/manifest.json',
   appleWebApp: { capable: true, title: 'Contrata Fácil', statusBarStyle: 'default' },
+  other: { 'mobile-web-app-capable': 'yes' },
 };
 
 export const viewport: Viewport = {
