@@ -7,7 +7,7 @@ import { useRequireRole, sair } from '@/lib/session';
 import { DISPONIBILIDADES, FORMACOES, NIVEIS, REQUISITOS_PADRAO } from '@/lib/constants';
 import CidadeSelect from '@/components/CidadeSelect';
 import type { Candidate } from '@/lib/types';
-import Avatar from '@/components/Avatar';
+import AvatarUpload from '@/components/AvatarUpload';
 import BottomNav, { NAV_CANDIDATO } from '@/components/BottomNav';
 import Toast from '@/components/Toast';
 import ExcluirConta from '@/components/ExcluirConta';
@@ -24,6 +24,7 @@ export default function Perfil() {
   const [toast, setToast] = useState<string | null>(null);
 
   const [nome, setNome] = useState('');
+  const [foto, setFoto] = useState<string | null>(null);
   const [telefone, setTelefone] = useState('');
   const [idade, setIdade] = useState('');
   const [expAnos, setExpAnos] = useState('');
@@ -36,6 +37,7 @@ export default function Perfil() {
   useEffect(() => {
     if (!ready) return;
     setNome(profile.full_name || '');
+    setFoto(profile.avatar_url || null);
     setTelefone(profile.phone || '');
     setCidade(profile.city || '');
     supabase.from('candidates').select('*').eq('user_id', user.id).single().then(({ data }) => {
@@ -95,9 +97,8 @@ export default function Perfil() {
         <h1 className="text-center text-2xl font-extrabold text-ink">Seu Perfil</h1>
         <p className="mt-2 text-center text-brand-700">Complete seu perfil para receber<br />as melhores oportunidades.</p>
 
-        <div className="relative mx-auto mt-5 w-fit">
-          <Avatar nome={nome} url={profile.avatar_url} size={120} />
-          <span className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-brand-700 text-white shadow"><Pencil size={16} /></span>
+        <div className="mx-auto mt-5 w-fit">
+          <AvatarUpload tipo="perfil" nome={nome} url={foto} size={120} onDone={setFoto} onErro={setToast} />
         </div>
 
         <div className="mt-6 space-y-3">
