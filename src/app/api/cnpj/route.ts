@@ -3,6 +3,7 @@ import { cnpjValido, soDigitos } from '@/lib/cnpj';
 import { consultarCnpj } from '@/lib/cnpj-server';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
 
 // Freio simples por IP (por instância do servidor). A proteção forte contra abuso é o CAPTCHA do cadastro.
 const janela = new Map<string, { n: number; t: number }>();
@@ -23,6 +24,6 @@ export async function GET(req: NextRequest) {
   if (!cnpjValido(cnpj)) return NextResponse.json({ erro: 'CNPJ inválido. Confira os números.' }, { status: 400 });
 
   const r = await consultarCnpj(cnpj);
-  if (!r.ok || !r.dados) return NextResponse.json({ erro: r.erro || 'Falha na consulta.' }, { status: r.status || 502 });
+  if (!r.ok || !r.dados) return NextResponse.json({ erro: r.erro || 'Falha na consulta.', detalhe: r.detalhe }, { status: r.status || 502 });
   return NextResponse.json(r.dados);
 }
