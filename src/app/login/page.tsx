@@ -2,7 +2,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ChevronLeft, Briefcase, User, ChevronRight } from 'lucide-react';
+import { ChevronLeft, Briefcase, User, ChevronRight } from 'lucide-react'; 
 import { supabase } from '@/lib/supabase';
 import { LogoDeitada } from '@/components/Logo';
 
