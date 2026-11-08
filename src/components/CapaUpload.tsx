@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useRef, useState } from 'react'; 
 import { ImagePlus, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { reduzirImagem } from '@/lib/imagem';
