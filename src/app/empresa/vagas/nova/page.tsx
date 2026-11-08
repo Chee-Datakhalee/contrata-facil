@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Search, Plus, Check, Star } from 'lucide-react';
+import { ChevronLeft, Search, X, Check, Star } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRequireRole } from '@/lib/session';
 import { useEmpresaData } from '@/lib/empresa';
@@ -22,7 +22,6 @@ export default function NovaVaga() {
   const [cargo, setCargo] = useState('');
   const [reqs, setReqs] = useState<Req[]>([]);
   const [custom, setCustom] = useState('');
-  const [mostrarCustom, setMostrarCustom] = useState(false);
   const [beneficios, setBeneficios] = useState<string[]>([]);
   const [experiencia, setExperiencia] = useState('');
   const [horario, setHorario] = useState('');
@@ -35,22 +34,27 @@ export default function NovaVaga() {
   const [toast, setToast] = useState<string | null>(null);
 
   const temReq = (l: string) => reqs.some((r) => r.label === l);
-  const alternarReq = (l: string) => setReqs(temReq(l) ? reqs.filter((r) => r.label !== l) : [...reqs, { label: l }]);
+  const alternarReq = (l: string) => {
+    if (temReq(l)) { setReqs(reqs.filter((r) => r.label !== l)); return; }
+    if (reqs.length >= 20) { setToast('Limite de 20 requisitos.'); return; }
+    setReqs([...reqs, { label: l }]);
+  };
   const alternarEssencial = (l: string) => setReqs(reqs.map((r) => (r.label === l ? { ...r, essential: !r.essential } : r)));
   const alternarBeneficio = (b: string) => setBeneficios(beneficios.includes(b) ? beneficios.filter((x) => x !== b) : [...beneficios, b]);
 
   function addCustom() {
-    const l = custom.trim();
-    if (!l || temReq(l)) return;
+    const l = custom.replace(/\s+/g, ' ').trim().slice(0, 60);
+    if (!l) return;
+    if (temReq(l) || reqs.some((r) => r.label.toLowerCase() === l.toLowerCase())) { setCustom(''); return; }
+    if (reqs.length >= 20) { setToast('Limite de 20 requisitos.'); return; }
     setReqs([...reqs, { label: l }]);
     setCustom('');
-    setMostrarCustom(false);
   }
 
   function continuar() {
     if (passo === 0) {
       if (!cargo.trim()) { setToast('Informe qual cargo você procura.'); return; }
-      if (reqs.length === 0) { setToast('Marque pelo menos 1 requisito.'); return; }
+      if (reqs.length === 0) { setToast('Adicione pelo menos 1 requisito.'); return; }
     }
     setPasso(passo + 1);
   }
@@ -82,7 +86,7 @@ export default function NovaVaga() {
 
   if (!ready || loading) return <Loading />;
 
-  const customs = reqs.filter((r) => !REQUISITOS_PADRAO.some((p) => p.label === r.label));
+  const sugestoes = REQUISITOS_PADRAO.map((r) => r.label).filter((l) => !reqs.some((r) => r.label.toLowerCase() === l.toLowerCase()));
 
   return (
     <>
@@ -114,35 +118,37 @@ export default function NovaVaga() {
             </label>
 
             <h2 className="mt-7 text-lg font-extrabold">Quais são os principais requisitos?</h2>
-            <ul className="mt-3 space-y-3">
-              {REQUISITOS_PADRAO.map((r) => (
-                <li key={r.label} className="flex items-center gap-3">
-                  <button
-                    onClick={() => alternarReq(r.label)}
-                    role="checkbox"
-                    aria-checked={temReq(r.label)}
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 ${temReq(r.label) ? 'border-brand-700 bg-brand-700 text-white' : 'border-brand-300 bg-white'}`}
-                  >
-                    {temReq(r.label) && <Check size={18} strokeWidth={3} />}
-                  </button>
-                  <span className="text-base">{r.label}</span>
-                </li>
-              ))}
-              {customs.map((r) => (
-                <li key={r.label} className="flex items-center gap-3">
-                  <button onClick={() => alternarReq(r.label)} role="checkbox" aria-checked className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-brand-700 bg-brand-700 text-white"><Check size={18} strokeWidth={3} /></button>
-                  <span className="text-base">{r.label}</span>
-                </li>
-              ))}
-            </ul>
-
-            {mostrarCustom ? (
-              <div className="mt-3 flex gap-2">
-                <input className="input" value={custom} onChange={(e) => setCustom(e.target.value)} maxLength={60} placeholder="Novo requisito" autoFocus />
-                <button onClick={addCustom} className="rounded-2xl bg-brand-700 px-5 font-bold text-white">Adicionar</button>
+            <p className="mt-1 text-sm text-ink/70">Escreva o que a pessoa precisa saber ou ter e toque em Adicionar. Ex.: experiência em vendas, CNH B, boa comunicação.</p>
+            <div className="mt-3 flex gap-2">
+              <input
+                className="input"
+                value={custom}
+                onChange={(e) => setCustom(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustom(); } }}
+                maxLength={60}
+                placeholder="Digite um requisito"
+              />
+              <button type="button" onClick={addCustom} className="shrink-0 rounded-2xl bg-brand-700 px-5 font-bold text-white">Adicionar</button>
+            </div>
+            {reqs.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {reqs.map((r) => (
+                  <span key={r.label} className="chip !border-brand-700 !bg-brand-700 !text-white">
+                    {r.label}
+                    <button type="button" onClick={() => alternarReq(r.label)} aria-label={`Remover ${r.label}`}><X size={14} /></button>
+                  </span>
+                ))}
               </div>
-            ) : (
-              <button onClick={() => setMostrarCustom(true)} className="mt-4 flex items-center gap-2 font-bold text-brand-700"><Plus size={20} /> Adicionar requisito</button>
+            )}
+            {sugestoes.length > 0 && (
+              <>
+                <p className="mt-4 text-xs font-bold uppercase tracking-wide text-ink/50">Sugestões (toque para adicionar)</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {sugestoes.map((sg) => (
+                    <button key={sg} type="button" onClick={() => alternarReq(sg)} className="chip">+ {sg}</button>
+                  ))}
+                </div>
+              </>
             )}
 
             <h2 className="mt-7 text-lg font-extrabold">Quais benefícios oferece?</h2>
