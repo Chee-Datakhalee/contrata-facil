@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation'; 
 import { ChevronLeft, Search, X, Check, Star } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRequireRole } from '@/lib/session';
