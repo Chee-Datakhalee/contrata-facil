@@ -12,6 +12,9 @@ import CandidatoCard from '@/components/CandidatoCard';
 import BottomNav, { NAV_EMPRESA } from '@/components/BottomNav';
 import Loading from '@/components/Loading';
 import VerificacaoCnpj from '@/components/VerificacaoCnpj';
+import AvatarUpload from '@/components/AvatarUpload';
+import FechadasHoje from '@/components/FechadasHoje';
+import Toast from '@/components/Toast';
 
 export default function EmpresaHome() {
   const router = useRouter();
@@ -19,6 +22,7 @@ export default function EmpresaHome() {
   const { company, jobs, apps, loading, setApps, recarregar } = useEmpresaData(ready ? user.id : undefined);
   const [jobId, setJobId] = useState('todas');
   const [ordem, setOrdem] = useState<'relevantes' | 'recentes'>('relevantes');
+  const [toast, setToast] = useState<string | null>(null);
 
   const ativas = jobs.filter((j) => j.status === 'ativa');
   const jobMap = useMemo(() => new Map(jobs.map((j) => [j.id, j])), [jobs]);
@@ -47,7 +51,9 @@ export default function EmpresaHome() {
 
   return (
     <>
+      <Toast msg={toast} onClose={() => setToast(null)} />
       <main className="safe-bottom px-5 pt-5">
+        <FechadasHoje />
         <header className="flex items-center justify-between">
           <LogoDeitada height={48} />
           <div className="flex items-center gap-3">
@@ -55,7 +61,7 @@ export default function EmpresaHome() {
               <Bell size={22} className="text-brand-700" />
               {novas > 0 && <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-xs font-bold text-white">{novas}</span>}
             </button>
-            <button aria-label="Meu plano" onClick={() => router.push('/empresa/plano')}><Avatar nome={company?.name} url={company?.logo_url} size={44} dark /></button>
+            <AvatarUpload tipo="empresa" nome={company?.name} url={company?.logo_url} size={44} dark onDone={() => recarregar()} onErro={setToast} />
           </div>
         </header>
 
