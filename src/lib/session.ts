@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from './supabase';
+import { supabase } from './supabase'; 
 
 export type Role = 'empresa' | 'profissional';
 
