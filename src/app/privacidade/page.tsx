@@ -8,9 +8,9 @@ export const metadata = { title: 'Termos e Política de Privacidade — Contrata
 // ============================================================================
 const EMPRESA = {
   nome: 'Contrata Fácil',
-  razaoSocial: '',  // ex.: 'NOME EMPRESARIAL LTDA'
-  cnpj: '',         // ex.: '00.000.000/0001-00'
-  email: '',        // e-mail para pedidos sobre dados pessoais (LGPD)
+  razaoSocial: '63.889.825 VINICIUS VALENTE CLEMENTE',  // nome empresarial, como consta na Receita
+  cnpj: '63.889.825/0001-29',
+  email: 'contato@contratafacil.com.br',  // e-mail para pedidos sobre dados pessoais (LGPD)
 };
 const ATUALIZADO_EM = '8 de novembro de 2026';
 
