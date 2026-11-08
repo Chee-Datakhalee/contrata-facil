@@ -1,10 +1,12 @@
 import { iniciais } from '@/lib/compat';
+import { fotoUrl } from '@/lib/foto';
 
 export default function Avatar({ nome, url, size = 44, square = false, dark = false }: { nome?: string | null; url?: string | null; size?: number; square?: boolean; dark?: boolean }) {
   const radius = square ? 'rounded-2xl' : 'rounded-full';
-  if (url) {
+  const src = fotoUrl(url);
+  if (src) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={url} alt={nome || ''} style={{ width: size, height: size }} className={`${radius} object-cover`} />;
+    return <img src={src} alt={nome || ''} style={{ width: size, height: size }} className={`${radius} shrink-0 object-cover`} />;
   }
   return (
     <div
