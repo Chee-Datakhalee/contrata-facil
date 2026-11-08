@@ -1,10 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Briefcase, Users, GraduationCap, Clock, MapPin, ChevronRight, ChevronDown, Pencil, UserRound, LogOut } from 'lucide-react';
+import { Briefcase, Users, GraduationCap, Clock, MapPin, ChevronRight, ChevronDown, X, UserRound, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRequireRole, sair } from '@/lib/session';
-import { DISPONIBILIDADES, FORMACOES, NIVEIS, REQUISITOS_PADRAO } from '@/lib/constants';
+import { DISPONIBILIDADES, FORMACOES } from '@/lib/constants';
 import CidadeSelect from '@/components/CidadeSelect';
 import type { Candidate } from '@/lib/types';
 import AvatarUpload from '@/components/AvatarUpload';
@@ -30,6 +30,7 @@ export default function Perfil() {
   const [expAnos, setExpAnos] = useState('');
   const [expArea, setExpArea] = useState('');
   const [skills, setSkills] = useState<Record<string, number>>({});
+  const [novaHab, setNovaHab] = useState('');
   const [formacao, setFormacao] = useState('');
   const [disp, setDisp] = useState('');
   const [cidade, setCidade] = useState('');
@@ -54,6 +55,30 @@ export default function Perfil() {
     });
   }, [ready, user, profile]);
 
+  // Habilidades: texto livre, digitado pelo profissional (até 30). Pode colar várias separadas por vírgula.
+  function adicionarHab() {
+    const partes = novaHab.split(/[,;\n]/).map((t) => t.replace(/\s+/g, ' ').trim().slice(0, 60)).filter(Boolean);
+    if (!partes.length) return;
+    const novo: Record<string, number> = { ...skills };
+    let total = Object.values(novo).filter((v) => v > 0).length;
+    let cheio = false;
+    for (const p of partes) {
+      if (Object.keys(novo).some((k) => k.toLowerCase() === p.toLowerCase() && novo[k] > 0)) continue;
+      if (total >= 30) { cheio = true; break; }
+      novo[p] = 100;
+      total++;
+    }
+    setSkills(novo);
+    setNovaHab('');
+    if (cheio) setToast('Limite de 30 habilidades.');
+  }
+
+  function removerHab(k: string) {
+    const resto = { ...skills };
+    delete resto[k];
+    setSkills(resto);
+  }
+
   async function salvar() {
     if (!cidade) { setToast('Escolha sua cidade para ver as vagas.'); setAberta('local'); return; }
     setSalvando(true);
@@ -65,7 +90,7 @@ export default function Perfil() {
         exp_area: expArea.trim() || null,
         education: formacao || null,
         availability: disp || null,
-        skills,
+        skills: Object.fromEntries(Object.entries(skills).filter(([, v]) => v > 0)),
         updated_at: new Date().toISOString(),
       }).eq('user_id', user.id),
     ]);
@@ -79,7 +104,8 @@ export default function Perfil() {
 
   if (!ready || loading) return <Loading />;
 
-  const habilidadesResumo = Object.entries(skills).filter(([, v]) => v > 0).map(([k]) => k).slice(0, 2).join(', ') || 'Toque para preencher';
+  const listaHab = Object.entries(skills).filter(([, v]) => v > 0).map(([k]) => k);
+  const habilidadesResumo = listaHab.slice(0, 3).join(', ') || 'Toque para preencher';
 
   const linhas: { id: Secao; icon: any; titulo: string; resumo: string }[] = [
     { id: 'dados', icon: UserRound, titulo: 'Dados pessoais', resumo: [nome, telefone].filter(Boolean).join(' • ') || 'Toque para preencher' },
@@ -127,33 +153,39 @@ export default function Perfil() {
                     )}
                     {l.id === 'exp' && (
                       <>
-                        <input className="input" type="number" inputMode="numeric" min={0} placeholder="Anos de experiência" value={expAnos} onChange={(e) => setExpAnos(e.target.value)} />
-                        <input className="input" maxLength={80} placeholder="Área (ex.: vendas, atendimento)" value={expArea} onChange={(e) => setExpArea(e.target.value)} />
+                        <p className="text-sm text-ink/70">Conte rápido: qual a sua profissão ou área e há quantos anos você trabalha nela.</p>
+                        <input className="input" maxLength={80} placeholder="Sua profissão ou área (ex.: vendedor, atendente)" value={expArea} onChange={(e) => setExpArea(e.target.value)} />
+                        <div className="grid grid-cols-[110px_1fr] items-center gap-3">
+                          <input className="input" type="number" inputMode="numeric" min={0} max={80} placeholder="Anos" value={expAnos} onChange={(e) => setExpAnos(e.target.value)} />
+                          <span className="text-sm text-ink/70">anos de experiência (coloque 0 se nunca trabalhou na área)</span>
+                        </div>
                       </>
                     )}
                     {l.id === 'hab' && (
-                      <div className="space-y-4">
-                        <p className="text-sm text-ink/70">Marque seu nível em cada item. Seja sincero: a empresa confirma na entrevista.</p>
-                        {REQUISITOS_PADRAO.map((r) => {
-                          const opcoes = r.binary ? [{ v: 0, l: 'Não tenho' }, { v: 100, l: 'Tenho' }] : NIVEIS;
-                          return (
-                            <div key={r.label}>
-                              <p className="mb-1.5 text-sm font-bold">{r.label}</p>
-                              <div className="flex flex-wrap gap-2">
-                                {opcoes.map((o) => (
-                                  <button
-                                    key={o.v}
-                                    type="button"
-                                    onClick={() => setSkills({ ...skills, [r.label]: o.v })}
-                                    className={`chip ${(skills[r.label] ?? 0) === o.v ? 'chip-on !bg-brand-700 !text-white' : ''}`}
-                                  >
-                                    {o.l}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })}
+                      <div className="space-y-3">
+                        <p className="text-sm text-ink/70">Escreva o que você sabe fazer e toque em Adicionar. Pode separar por vírgula. Ex.: vendas, atendimento ao cliente, Excel, CNH B.</p>
+                        <div className="flex gap-2">
+                          <input
+                            className="input"
+                            maxLength={200}
+                            placeholder="Ex.: atendimento ao cliente"
+                            value={novaHab}
+                            onChange={(e) => setNovaHab(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); adicionarHab(); } }}
+                          />
+                          <button type="button" onClick={adicionarHab} className="shrink-0 rounded-2xl bg-brand-700 px-5 font-bold text-white">Adicionar</button>
+                        </div>
+                        {listaHab.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {listaHab.map((k) => (
+                              <span key={k} className="chip !border-brand-700 !bg-brand-700 !text-white">
+                                {k}
+                                <button type="button" onClick={() => removerHab(k)} aria-label={`Remover ${k}`}><X size={14} /></button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-xs text-ink/60">{listaHab.length}/30 habilidades. Quanto mais completas, melhor a compatibilidade com as vagas.</p>
                       </div>
                     )}
                     {l.id === 'form' && (
