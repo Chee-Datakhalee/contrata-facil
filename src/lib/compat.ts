@@ -1,6 +1,6 @@
 import type { Job, Req } from './types';
 
-export type CompatItem = { label: string; essential: boolean; pct: number | null };
+export type CompatItem = { label: string; essential: boolean; pct: number | null }; 
 
 // ---------------------------------------------------------------------------
 // Compatibilidade v2: comparação de TEXTO LIVRE.
