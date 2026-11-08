@@ -46,7 +46,9 @@ export function salarioTexto(j: Pick<Job, 'salary_mode' | 'salary_min' | 'salary
 
 export function iniciais(nome?: string | null) {
   if (!nome) return '?';
-  const p = nome.trim().split(/\s+/);
+  const todas = nome.trim().split(/\s+/);
+  const letras = todas.filter((x) => /^[A-Za-zÀ-ÿ]/.test(x));
+  const p = letras.length ? letras : todas;
   return ((p[0]?.[0] || '') + (p.length > 1 ? p[p.length - 1][0] : '')).toUpperCase();
 }
 
